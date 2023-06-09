@@ -25,4 +25,10 @@ pub struct EmployeeGrade {
     pub grade: u64
 }
 
+#[derive(BorshDeserialize, BorshSerialize, Debug, Clone)]
+pub struct Amount{
+    pub amount:u64
+}
+
+
 

@@ -34,6 +34,21 @@ pub fn process_instruction(
                 accounts,
                 &instruction_data[1..instruction_data.len()]
             )
+        }else if instruction_data[0] == 3{
+            return crate::processor::deleteEmployee(
+                program_id,
+                accounts,
+                &instruction_data[1..instruction_data.len()]
+            )
+
+        }
+        else if instruction_data[0] == 4{
+            return crate::processor::transfer_tokens(
+                program_id,
+                accounts,
+                &instruction_data[1..instruction_data.len()]
+            )
+
         }
 
 msg!("Yada Yada");
