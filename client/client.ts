@@ -195,14 +195,20 @@ async function addEmployee(id: number, name: string, phone: string, grade: numbe
 }
 
 async function getEmployeeDetails() {
-
+    // account that holds the data you want
     const dataAccount = new solanaweb3.PublicKey("J5ibHQpSChTHXT9N8MWoqafNkdTpEfGrkJm2jqzdFbF");
+
+    //contract id
     const programId = new solanaweb3.PublicKey("8f4tWJU1kVofUAJVey17yv5jif57GxsHbBTaRd2qmk8");
 
+    //multple accounts
     const accounts = await connection.getParsedProgramAccounts(programId)
+
+    //One account
     const data = await connection.getAccountInfo(dataAccount)
 
     let allAccounts: any = []
+    //looping through the accounts and deserializing each one
     for (let i = 0; i < accounts.length; i++) {
         allAccounts.push(borsh.deserializeUnchecked(employeeSchema, Employee, accounts[i].account.data))
     }
@@ -266,9 +272,11 @@ async function deleteData() {
 
     const feePayer = solanaweb3.Keypair.fromSecretKey(new Uint8Array(private_key));
 
+    // two accounts, the owner of the account and the accout to be deleted
     let accounts = [
         {
 
+            //account to be deleted
             pubkey: new solanaweb3.PublicKey("J5ibHQpSChTHXT9N8MWoqafNkdTpEfGrkJm2jqzdFbF"),
             isSigner: false,
             isWritable: true
@@ -288,6 +296,7 @@ async function deleteData() {
     const deleteEmpIns = new solanaweb3.TransactionInstruction({
         keys: accounts,
         programId: programId,
+        //don't need to send data, just delete information
         data: Buffer.from([3])
     })
 
@@ -394,6 +403,8 @@ async function transferTokens(numerbOfTokes: number) {
         mint,
         toWallet.publicKey // owner of account
     );
+
+    // accounts to send tokens and to receive tokens
     let accounts = [
         {
             pubkey: new solanaweb3.PublicKey("HgvWqfoXfihjQpViArDwaELHvmZXyZ5vkarwTeWpsxEA"),
@@ -420,12 +431,7 @@ async function transferTokens(numerbOfTokes: number) {
         },
     ]
     let amount = new Amount({ amount: numerbOfTokes })
-    // &token_program_id.key,
-    // &source_token_account.key,
-    // &destination_token_account.key,
-    // &authority_id.key,
-    // &[authority_id.key],
-    // amount)?;
+
     const programId = new solanaweb3.PublicKey("8f4tWJU1kVofUAJVey17yv5jif57GxsHbBTaRd2qmk8");
 
     const serialized_amount = borsh.serialize(ammountSchema, amount);
