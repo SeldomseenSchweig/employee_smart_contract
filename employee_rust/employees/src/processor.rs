@@ -23,6 +23,7 @@ use borsh::{
 pub fn addEmployee(
     programId:&Pubkey,
     accounts:&[AccountInfo],
+    //instruction data is the information we are sending
     _instruction_data:&[u8]) -> ProgramResult{
 
         let accounts_iter = &mut accounts.iter();
@@ -36,9 +37,7 @@ pub fn addEmployee(
         company_data.name = employee_data.name;
         company_data.phone = employee_data.phone;
         company_data.grade = employee_data.grade;
-
         company_data.serialize(&mut &mut data_account.try_borrow_mut_data()?[..])?;
-
         Ok(())
 }
 
