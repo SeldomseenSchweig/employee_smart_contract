@@ -5,11 +5,12 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "ts-node":"ts-node client.ts"
+    "ts-node": "ts-node client.ts"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@solana/spl-token": "^0.3.8",
     "borsh": "^0.7.0",
     "ts-node": "^10.9.1",
     "typescript": "^5.1.3"
