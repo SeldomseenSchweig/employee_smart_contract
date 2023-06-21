@@ -13,6 +13,6 @@ The steps are:
 
 
 
-#Advice
+# Advice
 
 Smart contracts might seem daunting at first, but it is just a step by step process. Go step by step, follow the same pattern with each contract, intruction, etc and it will become easier.
