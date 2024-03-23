@@ -115,6 +115,29 @@ pub fn updateEmployee(
             Ok(())
                      
         }
+        //add pet to state next
+        pub fn addPet(
+            programId:&Pubkey,
+            accounts:&[AccountInfo],
+            //instruction data is the information we are sending
+            _instruction_data:&[u8]) -> ProgramResult{
+        
+                let accounts_iter = &mut accounts.iter();
+                let data_account = next_account_info(accounts_iter)?;
+        
+                let employee_data = crate::state::Employee::try_from_slice(&_instruction_data)?;
+                let mut company_data = try_from_slice_unchecked::<crate::state::Employee>(*data_account.data.borrow()).unwrap();
+        
+                // company_data.employees.push(employee_data);
+                company_data.id = employee_data.id;
+                company_data.name = employee_data.name;
+                company_data.phone = employee_data.phone;
+                company_data.grade = employee_data.grade;
+                company_data.serialize(&mut &mut data_account.try_borrow_mut_data()?[..])?;
+                Ok(())
+        }
+
+
 
     // Internal Method
     pub fn try_from_slice_unchecked<T: BorshDeserialize>(data: &[u8]) -> Result<T, Error> {

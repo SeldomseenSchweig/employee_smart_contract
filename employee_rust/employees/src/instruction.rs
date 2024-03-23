@@ -49,6 +49,13 @@ pub fn process_instruction(
                 &instruction_data[1..instruction_data.len()]
             )
 
+        }else if instruction_data[0] == 5{
+            return crate::processor::addPet(
+                program_id,
+                accounts,
+                &instruction_data[1..instruction_data.len()]
+            )
+
         }
 
 msg!("Yada Yada");

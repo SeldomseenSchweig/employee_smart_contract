@@ -92,6 +92,40 @@ const EMPLOYEE_SIZE = borsh.serialize(
 
 ).length
 
+class Pet {
+    
+    name: string
+    age: number
+    breed: string
+
+    constructor(fields: {name: string, age: number, breed: string }) {
+        
+            this.name = fields.name,
+            this.age = fields.age,
+            this.breed = fields.breed
+    }
+}
+const petSchema = new Map([
+    [
+        Pet,
+        {
+            'kind': 'struct',
+            'fields': [
+                
+                ['name', "string"],
+                ['age', "number"],
+                ['breed', "string"]
+            ]
+        }
+    ]
+])
+
+const PET_SIZE = borsh.serialize(
+    petSchema,
+    new Pet({ name: "Sissy", age: 983412, breed: "lab" })
+
+).length
+
 async function client() {
 
     // id of smart contract on blockchain
@@ -116,15 +150,15 @@ async function client() {
     // makes a key pair of public key and private key
     const feePayer = solanaweb3.Keypair.fromSecretKey(new Uint8Array(private_key));
 
-    // gets rent for cda, account created by smart contract
+    // gets rent for pda, account created by smart contract
     const lamportsEqualTo = await connection.getMinimumBalanceForRentExemption(EMPLOYEE_SIZE);
 
-    // generating a public key for the CDA, the account that will hold the data sent to the blockchain
+    // generating a public key for the PDA, the account that will hold the data sent to the blockchain
     const genpubkey = await solanaweb3.PublicKey.createWithSeed(feePayer.publicKey, "blihoiu8y", programId);
 
     console.log(genpubkey);
 
-    //creates the CDA account
+    //creates the PDA account
     const createAccountInstruction = solanaweb3.SystemProgram.createAccountWithSeed({
         fromPubkey: feePayer.publicKey, // who created the account/paid for it
         basePubkey: feePayer.publicKey, // Needs to match the fromPubkey
@@ -152,7 +186,7 @@ async function addEmployee(id: number, name: string, phone: string, grade: numbe
     const emp = new Employee({ id: id, name: name, phone: phone, grade: grade });
     const serEmp = borsh.serialize(employeeSchema, emp);
 
-    // this is the CDA that is going to hold the information
+    // this is the PDA that is going to hold the information
     let accounts = [{
         pubkey: new solanaweb3.PublicKey("J5ibHQpSChTHXT9N8MWoqafNkdTpEfGrkJm2jqzdFbF"),
         isSigner: false,
@@ -164,7 +198,7 @@ async function addEmployee(id: number, name: string, phone: string, grade: numbe
     const programId = new solanaweb3.PublicKey("8f4tWJU1kVofUAJVey17yv5jif57GxsHbBTaRd2qmk8");
 
     const addEmployeeInstructions = new solanaweb3.TransactionInstruction({
-        //Question:  Could this be in any order? yes but they need the same names
+
         keys: accounts,
         programId: programId,
         data: Buffer.from([1, ...serEmp])
@@ -193,6 +227,8 @@ async function addEmployee(id: number, name: string, phone: string, grade: numbe
     console.log(signature);
 
 }
+
+
 
 async function getEmployeeDetails() {
     // account that holds the data you want
@@ -452,6 +488,83 @@ async function transferTokens(numerbOfTokes: number) {
 
 
 
+
+
+
+}
+async function addPet(name:string, age:number, breed:string){
+
+
+    const private_key = [
+        174, 43, 71, 196, 184, 1, 205, 37, 10, 122, 10,
+        118, 196, 190, 229, 119, 109, 33, 9, 37, 61, 226,
+        49, 76, 144, 229, 61, 64, 60, 251, 55, 36, 173,
+        238, 155, 56, 68, 233, 39, 130, 57, 23, 65, 178,
+        29, 43, 220, 91, 241, 170, 35, 204, 36, 254, 33,
+        109, 101, 183, 229, 70, 215, 137, 37, 75
+    ];
+
+    //this is paying for the CDA creation
+    const feePayer = solanaweb3.Keypair.fromSecretKey(new Uint8Array(private_key));
+
+    //Contract ID
+    const programId = new solanaweb3.PublicKey("8f4tWJU1kVofUAJVey17yv5jif57GxsHbBTaRd2qmk8");
+
+
+
+    const pet = new Pet({name: name, age: age, breed: breed });
+    const serPet = borsh.serialize(petSchema, pet);
+
+    const lamportsEqualTo = await connection.getMinimumBalanceForRentExemption(PET_SIZE);
+
+    // generating a public key for the PDA, the account that will hold the data sent to the blockchain
+    const genpubkey = await solanaweb3.PublicKey.createWithSeed(feePayer.publicKey, "blihoiu88", programId);
+
+    console.log("Public Key for PDA: ",genpubkey);
+
+    //creates the PDA account
+    const createAccountInstruction = solanaweb3.SystemProgram.createAccountWithSeed({
+        fromPubkey: feePayer.publicKey, // who created the account/paid for it
+        basePubkey: feePayer.publicKey, // Needs to match the fromPubkey
+        seed: "blihoiu88",
+        lamports: lamportsEqualTo,
+        newAccountPubkey: genpubkey,
+        space: PET_SIZE,
+        programId
+    });
+
+    const transaction = new solanaweb3.Transaction().add(createAccountInstruction);
+    transaction.feePayer = feePayer.publicKey
+
+    const signature = await solanaweb3.sendAndConfirmTransaction(connection, transaction, [feePayer]).catch((err: any) => {
+        console.log(err);
+    });
+
+    
+    let accounts = [{
+        pubkey: new solanaweb3.PublicKey(signature),
+        isSigner: false,
+        isWritable: true
+
+    }]
+    const addPetInstructions = new solanaweb3.TransactionInstruction({
+
+        keys: accounts,
+        programId: programId,
+        data: Buffer.from([5, ...serPet])
+    })
+
+    const petTransaction = new solanaweb3.Transaction().add(addPetInstructions);
+
+    petTransaction.feePayer = feePayer.publicKey
+
+    const petSignature = await solanaweb3.sendAndConfirmTransaction(connection, petTransaction, [feePayer]).catch((err: any) => {
+        console.log(err);
+    });
+
+    console.log("Signature of Pet Transaction: ", petSignature);
+
+
 }
 
 
@@ -461,4 +574,5 @@ async function transferTokens(numerbOfTokes: number) {
 // updateEmployees(1,5);
 // deleteData();
 //createTokens(1000)
-transferTokens(50)
+// transferTokens(50)
+addPet("rosie", 10,"lab")
